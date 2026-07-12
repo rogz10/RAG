@@ -1,0 +1,2 @@
+Le projet Personal RAG utilise FastAPI pour exposer une API
+Il utilise ChromaDB pour stocker les vecteurs et Ollama pour générer les réponses

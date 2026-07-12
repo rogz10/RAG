@@ -35,6 +35,18 @@ Cette approche permet au modèle de répondre à partir d'un contexte documentai
 - `Ollama` : exécution locale de modèles de langage.
 - `PyPDF` : extraction de contenu depuis des fichiers PDF.
 
+## Fonctionnalités
+
+- Chargement de documents depuis un dossier local.
+- Support des formats PDF, TXT et Markdown.
+- Découpage des documents en chunks.
+- Génération d'embeddings avec `sentence-transformers`.
+- Indexation locale dans `ChromaDB`.
+- Réindexation idempotente sans duplication des mêmes chunks.
+- Recherche sémantique sur les documents indexés.
+- Génération de réponses contextualisées avec un modèle Ollama.
+- API HTTP avec `FastAPI`.
+
 ## Architecture
 
 ```text
@@ -53,6 +65,7 @@ RAG/
   vector_db/           # stockage vectoriel local
   .env.example         # exemple de configuration d'environnement
   .gitignore
+  pyproject.toml        # configuration des tests
   requirements.txt     # dépendances Python
   README.md
 ```
@@ -64,6 +77,101 @@ RAG/
 - `vector_store.py` gère la création des embeddings et leur stockage dans la base vectorielle.
 - `rag_pipeline.py` orchestre la recherche documentaire et la génération de réponse.
 - `main.py` expose les fonctionnalités principales via une API.
+
+## Installation
+
+Cloner le projet puis créer un environnement virtuel :
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Installer les dépendances :
+
+```bash
+pip install -r requirements.txt
+```
+
+Créer le fichier d'environnement :
+
+```bash
+cp .env.example .env
+```
+
+Installer Ollama puis télécharger le modèle utilisé par défaut :
+
+```bash
+brew install ollama
+ollama pull llama3.2
+```
+
+## Utilisation
+
+Ajouter les documents à interroger dans le dossier :
+
+```text
+data/raw/
+```
+
+Lancer l'API :
+
+```bash
+uvicorn app.main:app --reload
+```
+
+Vérifier que l'API fonctionne :
+
+```bash
+curl http://localhost:8000/health
+```
+
+Indexer les documents :
+
+```bash
+curl -X POST http://localhost:8000/ingest
+```
+
+Poser une question :
+
+```bash
+curl -X POST http://localhost:8000/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question": "Résume les documents indexés"}'
+```
+
+La documentation interactive FastAPI est disponible à l'adresse :
+
+```text
+http://localhost:8000/docs
+```
+
+## Tests
+
+Exécuter la suite de tests :
+
+```bash
+pytest -q
+```
+
+La suite vérifie les endpoints de l'API, le chargement des documents, le découpage en chunks et la stabilité des identifiants utilisés pendant l'indexation.
+
+## Configuration
+
+Les variables principales sont configurées dans `.env` :
+
+```env
+APP_NAME="Personal RAG"
+DATA_RAW_DIR="data/raw"
+DATA_PROCESSED_DIR="data/processed"
+VECTOR_DB_DIR="vector_db"
+COLLECTION_NAME="personal_documents"
+EMBEDDING_MODEL="sentence-transformers/all-MiniLM-L6-v2"
+LLM_MODEL="llama3.2"
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=150
+RETRIEVAL_K=4
+```
 
 ## Cas D'usage
 

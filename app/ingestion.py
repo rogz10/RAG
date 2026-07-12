@@ -1,31 +1,62 @@
 from pathlib import Path
 
-from langchain_community.document_loaders import DirectoryLoader
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.document_loaders import TextLoader
+from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pypdf import PdfReader
 
 from app.config import settings
 
 
-def load_documents(data_dir: Path | None = None):
+SUPPORTED_EXTENSIONS = {".md", ".pdf", ".txt"}
+
+
+def load_documents(data_dir: Path | None = None) -> list[Document]:
     """Charge les documents depuis le dossier source"""
     source_dir = data_dir or settings.data_raw_dir
+    if not source_dir.exists():
+        return []
 
-    loaders = [
-        DirectoryLoader(str(source_dir), glob="**/*.pdf", loader_cls=PyPDFLoader),
-        DirectoryLoader(str(source_dir), glob="**/*.txt", loader_cls=TextLoader),
-        DirectoryLoader(str(source_dir), glob="**/*.md", loader_cls=TextLoader),
-    ]
+    documents: list[Document] = []
+    for path in sorted(source_dir.rglob("*")):
+        if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
+            continue
 
-    documents = []
-    for loader in loaders:
-        documents.extend(loader.load())
+        if path.suffix.lower() == ".pdf":
+            documents.extend(_load_pdf(path))
+        else:
+            documents.append(_load_text(path))
 
     return documents
 
 
-def split_documents(documents):
+def _load_text(path: Path) -> Document:
+    """Charge un document texte"""
+    return Document(
+        page_content=path.read_text(encoding="utf-8"),
+        metadata={"source": str(path)},
+    )
+
+
+def _load_pdf(path: Path) -> list[Document]:
+    """Charge chaque page utile d un document PDF"""
+    documents = []
+    for page_number, page in enumerate(PdfReader(path).pages, start=1):
+        content = page.extract_text()
+        if content and content.strip():
+            documents.append(
+                Document(
+                    page_content=content,
+                    metadata={
+                        "page": page_number,
+                        "source": str(path),
+                    },
+                ),
+            )
+
+    return documents
+
+
+def split_documents(documents: list[Document]) -> list[Document]:
     """Découpe les documents en morceaux exploitables par le RAG"""
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=settings.chunk_size,
