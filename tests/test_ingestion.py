@@ -21,3 +21,4 @@ def test_split_documents_creates_multiple_chunks():
 
     assert len(chunks) >= 2
     assert all(chunk.page_content for chunk in chunks)
+    assert all("start_index" in chunk.metadata for chunk in chunks)

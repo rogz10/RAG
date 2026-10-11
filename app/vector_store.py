@@ -8,12 +8,12 @@ from app.config import settings
 
 
 def get_embeddings():
-    """Crée le modèle qui transforme le texte en vecteurs"""
+    """crée le modèle qui transforme le texte en vecteurs"""
     return HuggingFaceEmbeddings(model_name=settings.embedding_model)
 
 
 def get_vector_store():
-    """Retourne la base vectorielle locale ChromaDB"""
+    """retourne la base vectorielle locale chromadb"""
     return Chroma(
         collection_name=settings.collection_name,
         embedding_function=get_embeddings(),
@@ -22,7 +22,7 @@ def get_vector_store():
 
 
 def index_documents(documents: list[Document]):
-    """Ajoute les documents découpés dans la base vectorielle"""
+    """ajoute les documents découpés dans la base vectorielle"""
     vector_store = get_vector_store()
     ids = [_document_id(document) for document in documents]
     vector_store.add_documents(documents, ids=ids)
@@ -30,7 +30,7 @@ def index_documents(documents: list[Document]):
 
 
 def _document_id(document: Document) -> str:
-    """Crée un identifiant stable pour éviter les doublons"""
+    """crée un identifiant stable pour éviter les doublons"""
     identity = "|".join(
         [
             str(document.metadata.get("source", "")),

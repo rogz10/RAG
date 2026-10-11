@@ -11,7 +11,7 @@ SUPPORTED_EXTENSIONS = {".md", ".pdf", ".txt"}
 
 
 def load_documents(data_dir: Path | None = None) -> list[Document]:
-    """Charge les documents depuis le dossier source"""
+    """charge les documents depuis le dossier source"""
     source_dir = data_dir or settings.data_raw_dir
     if not source_dir.exists():
         return []
@@ -30,7 +30,7 @@ def load_documents(data_dir: Path | None = None) -> list[Document]:
 
 
 def _load_text(path: Path) -> Document:
-    """Charge un document texte"""
+    """charge un document texte"""
     return Document(
         page_content=path.read_text(encoding="utf-8"),
         metadata={"source": str(path)},
@@ -38,7 +38,7 @@ def _load_text(path: Path) -> Document:
 
 
 def _load_pdf(path: Path) -> list[Document]:
-    """Charge chaque page utile d un document PDF"""
+    """charge chaque page utile d un document pdf"""
     documents = []
     for page_number, page in enumerate(PdfReader(path).pages, start=1):
         content = page.extract_text()
@@ -57,8 +57,9 @@ def _load_pdf(path: Path) -> list[Document]:
 
 
 def split_documents(documents: list[Document]) -> list[Document]:
-    """Découpe les documents en morceaux exploitables par le RAG"""
+    """découpe les documents en morceaux exploitables par le rag"""
     splitter = RecursiveCharacterTextSplitter(
+        add_start_index=True,
         chunk_size=settings.chunk_size,
         chunk_overlap=settings.chunk_overlap,
     )

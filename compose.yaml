@@ -1,0 +1,35 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # adresse du serveur ollama vue depuis le conteneur
+      # par défaut ollama tourne sur ta machine hôte
+      OLLAMA_HOST: ${OLLAMA_URL:-http://host.docker.internal:11434}
+    volumes:
+      # documents et base vectorielle restent sur ta machine
+      - ./data:/app/data
+      - ./vector_db:/app/vector_db
+      # cache du modèle d embeddings pour ne pas le retélécharger
+      - hf_cache:/root/.cache/huggingface
+    extra_hosts:
+      # rend host.docker.internal disponible aussi sous linux
+      - "host.docker.internal:host-gateway"
+
+  # ollama dans un conteneur : utile sur un serveur linux
+  # lancé seulement avec --profile ollama
+  ollama:
+    image: ollama/ollama
+    profiles: ["ollama"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+volumes:
+  hf_cache:
+  ollama_data:

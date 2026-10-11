@@ -13,20 +13,20 @@ app = FastAPI(title=settings.app_name)
 
 
 class AskRequest(BaseModel):
-    """Corps attendu pour poser une question"""
+    """corps attendu pour poser une question"""
 
     question: str
 
 
 @app.get("/health")
 def health_check():
-    """Vérifie que l API répond"""
+    """vérifie que l api répond"""
     return {"status": "ok"}
 
 
 @app.post("/ingest")
 def ingest_documents():
-    """Charge les documents et les indexe dans ChromaDB"""
+    """charge les documents et les indexe dans chromadb"""
     documents = load_documents()
     if not documents:
         raise HTTPException(
@@ -45,7 +45,7 @@ def ingest_documents():
 
 @app.post("/ask")
 def ask(request: AskRequest):
-    """Pose une question au système RAG"""
+    """pose une question au système rag"""
     if not request.question.strip():
         raise HTTPException(
             status_code=400,
