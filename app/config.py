@@ -46,9 +46,9 @@ class Settings:
     llm_model: str = os.getenv("LLM_MODEL", "llama3.2")
 
     # paramètres du découpage documentaire et de la recherche sémantique
-    chunk_size: int = int(os.getenv("CHUNK_SIZE", "1000"))
-    chunk_overlap: int = int(os.getenv("CHUNK_OVERLAP", "150"))
-    retrieval_k: int = int(os.getenv("RETRIEVAL_K", "4"))
+    chunk_size: int = int(os.getenv("CHUNK_SIZE", "1000")) # taille maximale d un chunk en nombre de caractères
+    chunk_overlap: int = int(os.getenv("CHUNK_OVERLAP", "150")) # chevauchement entre deux chunks consécutifs en nombre de caractères
+    retrieval_k: int = int(os.getenv("RETRIEVAL_K", "4")) # nombre de résultats de recherche à retourner
 
 
 # instance partagée à importer dans les autres modules

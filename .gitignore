@@ -13,3 +13,5 @@ data/processed/*
 !data/processed/.gitkeep
 
 .DS_Store
+
+docs/
