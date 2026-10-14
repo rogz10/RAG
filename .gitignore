@@ -8,6 +8,7 @@ __pycache__/
 vector_db/
 data/raw/*
 data/processed/*
+data/corpus_eval/*
 
 !data/raw/.gitkeep
 !data/processed/.gitkeep
@@ -15,3 +16,7 @@ data/processed/*
 .DS_Store
 
 docs/
+
+mlruns/
+mlartifacts/
+models/
