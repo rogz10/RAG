@@ -18,5 +18,6 @@ data/corpus_eval/*
 docs/
 
 mlruns/
+mlflow.db
 mlartifacts/
 models/
