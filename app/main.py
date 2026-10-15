@@ -1,13 +1,10 @@
-from fastapi import FastAPI
-from fastapi import HTTPException
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from app.config import settings
-from app.ingestion import load_documents
-from app.ingestion import split_documents
+from app.ingestion import load_documents, split_documents
 from app.rag_pipeline import ask_question
 from app.vector_store import index_documents
-
 
 app = FastAPI(title=settings.app_name)
 

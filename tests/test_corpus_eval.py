@@ -1,5 +1,4 @@
-from eval.corpus import usable_chunk, letter_proportion
-
+from eval.corpus import letter_proportion, usable_chunk
 
 
 def test_letter_proportion():

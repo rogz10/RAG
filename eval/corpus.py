@@ -1,7 +1,10 @@
 from pathlib import Path
+
 from langchain_core.documents import Document
+
 from app.ingestion import load_documents, split_documents
 from app.vector_store import _document_id
+
 
 def letter_proportion(text:str) -> float:
     """

@@ -5,7 +5,6 @@ from langchain_core.documents import Document
 
 from app.main import app
 
-
 client = TestClient(app)
 
 
