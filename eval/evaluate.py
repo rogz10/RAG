@@ -49,7 +49,7 @@ def build_evaluator(rows: list[dict],corpus: dict[str,str], name:str) -> Informa
         corpus=corpus,
         relevant_docs=relevant_docs,
         name=name,
-        accuracy_at_k=[1,5], # évaluer la précision à k=1,5 hit@k
+        accuracy_at_k=[1,4,5], # évaluer la précision à k=1,4,5 hit@k
         mrr_at_k=[10], # évaluer le mean reciprocal rank à k=10 mrr@k
         show_progress_bar=True, # afficher la barre de progression
     )
@@ -58,16 +58,17 @@ def bm25_metrics(rows: list[dict], corpus: dict[str, str]) -> dict[str, float]:
     ids = list(corpus)
     tokenize = lambda text: re.findall(r"\w+", text.lower())
     bm25 = BM25Okapi([tokenize(corpus[i]) for i in ids])
-    hit_1 = hit_5 = mrr = 0.0
+    hit_1 = hit_4 = hit_5 = mrr = 0.0
     for row in rows:
         scores = bm25.get_scores(tokenize(row["question"]))
         ranking = [ids[k] for k in sorted(range(len(ids)), key=lambda k: -scores[k])]
         rank = ranking.index(row["chunk_id"]) + 1  # rang du bon chunk (1 = premier)
         hit_1 += rank == 1
+        hit_4 += rank <= 4
         hit_5 += rank <= 5
         mrr += 1 / rank if rank <= 10 else 0
     n = len(rows)
-    return {"hit_at_1": hit_1 / n, "hit_at_5": hit_5 / n, "mrr_at_10": mrr / n}
+    return {"hit_at_1": hit_1 / n, "hit_at_4": hit_4 / n, "hit_at_5": hit_5 / n, "mrr_at_10": mrr / n}
 
 if __name__ == "__main__":
     chunks, _ = load_eval_chunks(data_dir)
@@ -76,7 +77,7 @@ if __name__ == "__main__":
     evaluator = build_evaluator(val_rows, corpus, "val") # construire l'évaluateur pour l'ensemble de validation
     mlflow.set_experiment("evaluate_models-rag-retrieval") # définir l'expérience mlflow
     for label, model_name in MODELS.items():
-        model = SentenceTransformer(model_name)
+        model = SentenceTransformer(model_name,model_kwargs={"attn_implementation":"eager"})
         model.max_seq_length = MAX_SEQ_LENGTH
         print(f"Évaluation du modèle {label} : {model_name}")
         with mlflow.start_run(run_name=f"{label}-val"):
@@ -90,6 +91,7 @@ if __name__ == "__main__":
             results = evaluator(model)
             metrics = {
                 "hit_at_1": results["val_cosine_accuracy@1"],
+                "hit_at_4": results["val_cosine_accuracy@4"],
                 "hit_at_5": results["val_cosine_accuracy@5"],
                 "mrr_at_10": results["val_cosine_mrr@10"],
             }
