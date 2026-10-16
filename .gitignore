@@ -9,6 +9,7 @@ vector_db/
 data/raw/*
 data/processed/*
 data/corpus_eval/*
+!data/corpus_eval/*.jsonl
 
 !data/raw/.gitkeep
 !data/processed/.gitkeep
